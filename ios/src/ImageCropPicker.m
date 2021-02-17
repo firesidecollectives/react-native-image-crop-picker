@@ -363,30 +363,36 @@ RCT_EXPORT_METHOD(openPicker:(NSDictionary *)options
             [imagePickerController setModalPresentationStyle: UIModalPresentationFullScreen];
             
             bool animatePicker = YES;
-            if (@available(iOS 14, *)) {
-                PHAuthorizationStatus authStatus = [PHPhotoLibrary authorizationStatusForAccessLevel:PHAccessLevelReadWrite];
-                animatePicker = authStatus != PHAuthorizationStatusLimited;
+            bool showLimitedLibSelector = [[self.options objectForKey:@"presentLimitedLibraryPicker"] boolValue];
+            if(showLimitedLibSelector) {
+                if (@available(iOS 14, *)) {
+                    PHAuthorizationStatus authStatus = [PHPhotoLibrary authorizationStatusForAccessLevel:PHAccessLevelReadWrite];
+                    animatePicker = authStatus != PHAuthorizationStatusLimited;
+                }
             }
             
+            
             [[self getRootVC] presentViewController:imagePickerController animated:animatePicker completion:nil];
-            if (@available(iOS 14, *)) {
-                [[PHPhotoLibrary sharedPhotoLibrary] presentLimitedLibraryPickerFromViewController:imagePickerController];
+            if (showLimitedLibSelector) {
+                if (@available(iOS 14, *)) {
+                    [[PHPhotoLibrary sharedPhotoLibrary] presentLimitedLibraryPickerFromViewController:imagePickerController];
+                }
             }
         });
     }];
 }
 
-RCT_EXPORT_METHOD(getHasLimitedLibraryStatus,
+RCT_EXPORT_METHOD(getHasLimitedLibraryStatus:(NSDictionary *)options
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
     
-    bool isLimited = false
+    bool isLimited = false;
     if (@available(iOS 14, *)) {
         PHAuthorizationStatus authStatus = [PHPhotoLibrary authorizationStatusForAccessLevel:PHAccessLevelReadWrite];
-        isLimited = authStatus != PHAuthorizationStatusLimited;
+        isLimited = authStatus == PHAuthorizationStatusLimited;
     }
     
-    resolver(@[isLimited])
+    resolve(@(isLimited));
 }
 
 RCT_EXPORT_METHOD(openCropper:(NSDictionary *)options
@@ -934,3 +940,4 @@ RCT_EXPORT_METHOD(openCropper:(NSDictionary *)options
 }
 
 @end
+

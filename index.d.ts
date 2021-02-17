@@ -137,6 +137,13 @@ declare module "react-native-image-crop-picker" {
      * @default true
      */
     writeTempFile?: boolean;
+
+    /**
+     * Whether to show the limtedLibrary picker during selection.
+     * @platform iOS only
+     * @default false
+     */
+    presentLimitedLibraryPicker: boolean;
   }
 
   type ImageOptions = CommonOptions & {
@@ -473,7 +480,10 @@ declare module "react-native-image-crop-picker" {
     ? Video
     : ImageOrVideo;
 
-  export function getHasLimitedLibraryStatus(): Promise<boolean>;
+  export function getHasLimitedLibraryStatus<O extends Object>(
+    options: O
+  ): Promise<boolean>;
+
   export function openPicker<O extends Options>(
     options: O
   ): Promise<PossibleArray<O, MediaType<O>>>;
@@ -485,7 +495,7 @@ declare module "react-native-image-crop-picker" {
   export function cleanSingle(path: string): Promise<void>;
 
   export interface ImageCropPicker {
-    getHasLimitedLibraryStatus(): Promise<boolean>;
+    getHasLimitedLibraryStatus<O extends Object>(options: O): Promise<boolean>;
     openPicker<O extends Options>(
       options: O
     ): Promise<PossibleArray<O, MediaType<O>>>;
