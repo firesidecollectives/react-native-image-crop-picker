@@ -6,8 +6,10 @@
 //
 
 #import <MobileCoreServices/MobileCoreServices.h>
-
+#import <Photos/Photos.h>
+#import <PhotosUI/PhotosUI.h>
 #import "ImageCropPicker.h"
+
 
 #define ERROR_PICKER_CANNOT_RUN_CAMERA_ON_SIMULATOR_KEY @"E_PICKER_CANNOT_RUN_CAMERA_ON_SIMULATOR"
 #define ERROR_PICKER_CANNOT_RUN_CAMERA_ON_SIMULATOR_MSG @"Cannot run camera on simulator"
@@ -283,7 +285,9 @@ RCT_EXPORT_METHOD(openPicker:(NSDictionary *)options
     [self setConfiguration:options resolver:resolve rejecter:reject];
     self.currentSelectionMode = PICKER;
     
+
     [PHPhotoLibrary requestAuthorization:^(PHAuthorizationStatus status) {
+        
         if (status != PHAuthorizationStatusAuthorized) {
             self.reject(ERROR_NO_LIBRARY_PERMISSION_KEY, ERROR_NO_LIBRARY_PERMISSION_MSG, nil);
             return;
@@ -357,7 +361,17 @@ RCT_EXPORT_METHOD(openPicker:(NSDictionary *)options
             }
             
             [imagePickerController setModalPresentationStyle: UIModalPresentationFullScreen];
-            [[self getRootVC] presentViewController:imagePickerController animated:YES completion:nil];
+            
+            bool animatePicker = YES;
+            if (@available(iOS 14, *)) {
+                PHAuthorizationStatus authStatus = [PHPhotoLibrary authorizationStatusForAccessLevel:PHAccessLevelReadWrite];
+                animatePicker = authStatus != PHAuthorizationStatusLimited;
+            }
+            
+            [[self getRootVC] presentViewController:imagePickerController animated:animatePicker completion:nil];
+            if (@available(iOS 14, *)) {
+                [[PHPhotoLibrary sharedPhotoLibrary] presentLimitedLibraryPickerFromViewController:imagePickerController];
+            }
         });
     }];
 }
