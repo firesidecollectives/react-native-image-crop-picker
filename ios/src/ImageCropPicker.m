@@ -376,6 +376,19 @@ RCT_EXPORT_METHOD(openPicker:(NSDictionary *)options
     }];
 }
 
+RCT_EXPORT_METHOD(getHasLimitedLibraryStatus,
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+    
+    bool isLimited = false
+    if (@available(iOS 14, *)) {
+        PHAuthorizationStatus authStatus = [PHPhotoLibrary authorizationStatusForAccessLevel:PHAccessLevelReadWrite];
+        isLimited = authStatus != PHAuthorizationStatusLimited;
+    }
+    
+    resolver(@[isLimited])
+}
+
 RCT_EXPORT_METHOD(openCropper:(NSDictionary *)options
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
